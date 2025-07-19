@@ -118,8 +118,8 @@ function Keybinds.rebind(queriedName: string, newInput: Enum.KeyCode | Enum.User
 	local oldInput, foundLayers, callbacks = findCallback(queriedName)
 
 	if oldInput and callbacks and #foundLayers > 0 then
-		Keybinds.bind(newInput, foundLayers, queriedName, callbacks)
 		Keybinds.unbind(queriedName, foundLayers)
+		Keybinds.bind(newInput, foundLayers, queriedName, callbacks)
 	end
 end
 
