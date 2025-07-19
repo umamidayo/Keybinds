@@ -22,9 +22,8 @@ local Keybinds = {
 		Ragdoll = "Ragdoll",
 		Unmounted = "Unmounted",
 	},
-	currentLayer = "Default",
-	previousLayer = "Default",
 }
+Keybinds.currentLayer = Keybinds.Layers.Default
 
 -- Binds the input's began and ended events to a function in the specified layers.
 function Keybinds.bind(
@@ -50,43 +49,77 @@ function Keybinds.bind(
 	end
 end
 
--- Unbinds and cleans up the events for the input in the specified layers.
-function Keybinds.unbind(input: Enum.KeyCode | Enum.UserInputType, layers: { Layer | string }, callbackName: string)
-	if not Binds[input] then
-		return
+-- Helper function to find all locations of a callback
+local function findCallback(callbackName: string)
+	for input, layers in Binds do
+		local foundLayers = {}
+		local callbacks = nil
+
+		for layer, callbacksInLayer in layers do
+			if callbacksInLayer[callbackName] then
+				table.insert(foundLayers, layer)
+				callbacks = callbacksInLayer[callbackName]
+			end
+		end
+
+		if #foundLayers > 0 then
+			return input, foundLayers, callbacks
+		end
 	end
 
-	for _, layer in ipairs(layers) do
-		Binds[input][layer][callbackName] = nil
+	return nil, {}, nil
+end
+
+local function cleanupBinds()
+	for input, inputLayers in Binds do
+		for layer, callbacksInLayer in inputLayers do
+			local hasCallbacks = next(callbacksInLayer) ~= nil
+			if not hasCallbacks then
+				inputLayers[layer] = nil
+			end
+		end
+
+		local hasLayers = next(inputLayers) ~= nil
+		if not hasLayers then
+			Binds[input] = nil
+		end
 	end
+end
+
+local function shouldUnbindLayer(layer: string, targetLayers: { string }?): boolean
+	if not targetLayers then
+		return true
+	end
+
+	for _, targetLayer in ipairs(targetLayers) do
+		if layer == targetLayer then
+			return true
+		end
+	end
+
+	return false
+end
+
+-- Unbinds and cleans up the events for the callback in the specified layers.
+function Keybinds.unbind(callbackName: string, layers: { Layer | string }?)
+	for _, inputLayers in Binds do
+		for layer, callbacksInLayer in inputLayers do
+			if callbacksInLayer[callbackName] and shouldUnbindLayer(layer, layers) then
+				callbacksInLayer[callbackName] = nil
+			end
+		end
+	end
+
+	cleanupBinds()
 end
 
 -- Rebinds a callback to a new input in all layers.
 function Keybinds.rebind(queriedName: string, newInput: Enum.KeyCode | Enum.UserInputType)
-	local foundLayers = {}
-	local oldInput = nil
-	local callbacks = nil
-
-	for input, layers in Binds do
-		local foundInThisInput = false
-		for layer, callbacksInLayer in layers do
-			for callbackName, callbackData in callbacksInLayer do
-				if callbackName == queriedName then
-					table.insert(foundLayers, layer)
-					oldInput = input
-					callbacks = callbackData
-					foundInThisInput = true
-				end
-			end
-		end
-		if foundInThisInput then
-			break
-		end
-	end
+	local oldInput, foundLayers, callbacks = findCallback(queriedName)
 
 	if oldInput and callbacks and #foundLayers > 0 then
 		Keybinds.bind(newInput, foundLayers, queriedName, callbacks)
-		Keybinds.unbind(oldInput, foundLayers, queriedName)
+		Keybinds.unbind(queriedName, foundLayers)
 	end
 end
 
