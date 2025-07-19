@@ -61,6 +61,35 @@ function Keybinds.unbind(input: Enum.KeyCode | Enum.UserInputType, layers: { Lay
 	end
 end
 
+-- Rebinds a callback to a new input in all layers.
+function Keybinds.rebind(queriedName: string, newInput: Enum.KeyCode | Enum.UserInputType)
+	local foundLayers = {}
+	local oldInput = nil
+	local callbacks = nil
+
+	for input, layers in Binds do
+		local foundInThisInput = false
+		for layer, callbacksInLayer in layers do
+			for callbackName, callbackData in callbacksInLayer do
+				if callbackName == queriedName then
+					table.insert(foundLayers, layer)
+					oldInput = input
+					callbacks = callbackData
+					foundInThisInput = true
+				end
+			end
+		end
+		if foundInThisInput then
+			break
+		end
+	end
+
+	if oldInput and callbacks and #foundLayers > 0 then
+		Keybinds.bind(newInput, foundLayers, queriedName, callbacks)
+		Keybinds.unbind(oldInput, foundLayers, queriedName)
+	end
+end
+
 -- Changes the current layer name to listen for key mappings on that layer.
 function Keybinds.setLayer(layerName: Layer | string)
 	Keybinds.previousLayer = Keybinds.currentLayer
