@@ -95,10 +95,14 @@ You can also use custom layer names as strings.
 
 ### Methods
 
-#### `Keybinds.init()`
+### `Keybinds.init()`
+
 Initializes the keybinding system. Must be called on the client before using any other methods.
 
-#### `Keybinds.bind(input, layers, callbackName, callbacks)`
+---
+
+### `Keybinds.bind(input, layers, callbackName, callbacks)`
+
 Binds an input to callbacks in specific layers.
 
 **Parameters:**
@@ -108,6 +112,7 @@ Binds an input to callbacks in specific layers.
 - `callbacks` - Table with optional `began` and `ended` functions
 
 **Example:**
+
 ```lua
 Keybinds.bind(
     Enum.KeyCode.E,
@@ -121,30 +126,47 @@ Keybinds.bind(
 )
 ```
 
-#### `Keybinds.unbind(callbackName, layers?)`
+---
+
+### `Keybinds.unbind(callbackName, layers?)`
+
 Unbinds a callback from specified layers or all layers if none specified.
 
 **Parameters:**
 - `callbackName` - Name of the callback to unbind
 - `layers` - Optional array of layers to unbind from
 
-#### `Keybinds.rebind(callbackName, newInput)`
+---
+
+### `Keybinds.rebind(callbackName, newInput)`
+
 Changes the input key for an existing callback across all its layers.
 
 **Parameters:**
 - `callbackName` - Name of the callback to rebind
 - `newInput` - New `Enum.KeyCode` or `Enum.UserInputType`
 
-#### `Keybinds.setLayer(layerName)`
+---
+
+### `Keybinds.setLayer(layerName)`
+
 Switches to a different input layer.
 
 **Parameters:**
 - `layerName` - Name of the layer to activate
 
-#### `Keybinds.getLayer()`
+---
+
+### `Keybinds.getLayer()`
+
 Returns the current active layer name.
 
-#### `Keybinds.isLayer(layerName)`
+**Returns:** `string` - The current layer name
+
+---
+
+### `Keybinds.isLayer(layerName)`
+
 Checks if the current layer matches the given layer name.
 
 **Parameters:**
@@ -152,7 +174,10 @@ Checks if the current layer matches the given layer name.
 
 **Returns:** `boolean`
 
-#### `Keybinds.getLayerBinds(layerName)`
+---
+
+### `Keybinds.getLayerBinds(layerName)`
+
 Returns all bindings in a specific layer for debugging or UI display.
 
 **Parameters:**
